@@ -5,7 +5,6 @@ import {Server} from "http"
 import mongoose  from "mongoose";
 import app from "./app";
 import { envVars } from "./app/config/env";
-import { envVars } from './app/config/env';
 let server : Server
 
 
@@ -17,9 +16,9 @@ const startServer = async() => {
   try{
     console.log(envVars.NODE_ENV)
       console.log(process.env.NODE_ENV);
-    // await mongoose.connect(
-    //   `mongodb+srv://ph_tour:nUClQL7IEKjFALhQ@cluster0.7cqr184.mongodb.net/tour-management-server?retryWrites=true&w=majority&appName=Cluster0`
-    // );
+    await mongoose.connect(
+      `mongodb+srv://ph_tour:nUClQL7IEKjFALhQ@cluster0.7cqr184.mongodb.net/tour-management-server?retryWrites=true&w=majority&appName=Cluster0`
+    );
     console.log("Connected to MongoDB");
 
   server = app.listen(envVars.PORT, () => {
