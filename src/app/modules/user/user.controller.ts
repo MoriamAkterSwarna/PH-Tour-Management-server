@@ -6,6 +6,8 @@ import httpStatus from "http-status-codes";
 import { UserService } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import { verifyToken } from "../../utils/jwt";
+import { JwtPayload } from "jsonwebtoken";
 // import AppError from "../../errorHelpers/AppError";
 
 // type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
@@ -66,7 +68,7 @@ const createUser = catchAsync(async (req: Request, res: Response, next: NextFunc
 //   }
 // };
 
-const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+const getAllUsers = catchAsync(async(req: Request, res: Response, next: NextFunction) => {
   const users = await UserService.getUsers();
   // res.status(httpStatus.OK).json({ success: true,message:"All users data retrieved successfully", data: users });
 
@@ -74,14 +76,39 @@ const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFun
     statusCode: httpStatus.OK,
     success: true,
     message: "User retrieved successfully",
-    data: users.data,
+    data: users,
     meta: users.meta,
   });
 });
 
+
+const updateUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+
+    const userId = req.params.id;
+    // const token = req.headers.authorization || req.headers.Authorization; 
+    // const verifiedToken = verifyToken(token as string, process.env.JWT_SECRET as string) as JwtPayload ;
+
+    const verifiedToken = req.user;
+
+    const payload = req.body;
+    const user = await UserService.updateUser(userId, payload, verifiedToken )
+
+
+
+     sendResponse(res, {
+       success: true,
+       statusCode: httpStatus.OK,
+       message: "User updated successfully",
+       data: user,
+     });
+  }
+);
+
 export const UserController = {
   createUser,
-  getAllUsers
+  getAllUsers,
+  updateUser,
 };
 
 
