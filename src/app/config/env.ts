@@ -2,15 +2,20 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-interface EnvConfig{
-    PORT: string;
-    DB_URL: string;
-    NODE_ENV: string;
+interface EnvConfig {
+  PORT: string;
+  DB_URL: string;
+  NODE_ENV: "development" | "production";
+  JWT_SECRET: string;
+  JWT_ACCESS_TOKEN_EXPIRES_IN: string;
+  BCRYPT_SALT_ROUNDS: string;
+  SUPER_ADMIN_EMAIL: string;
+  SUPER_ADMIN_PASSWORD: string;
 }
  const loadEnvVariables= () : EnvConfig =>{
 
         const requiredEnvVariables : string[] = ["PORT",
-            "DB_URL", "NODE_ENV"
+            "DB_URL", "NODE_ENV", "JWT_SECRET", "JWT_ACCESS_TOKEN_EXPIRES_IN", "BCRYPT_SALT_ROUNDS", "SUPER_ADMIN_EMAIL", "SUPER_ADMIN_PASSWORD"
         ]
 
         requiredEnvVariables.forEach((key) => {
@@ -22,11 +27,19 @@ interface EnvConfig{
 
 
 return {
-    PORT: process.env.PORT as string,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    DB_URL: process.env.DB_URL!,
-    NODE_ENV: process.env.NODE_ENV as "development" | "production" 
-}
+  PORT: process.env.PORT as string,
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  DB_URL: process.env.DB_URL!,
+  NODE_ENV: process.env.NODE_ENV as "development" | "production",
+  JWT_SECRET: process.env.JWT_SECRET as string,
+  JWT_ACCESS_TOKEN_EXPIRES_IN: process.env
+    .JWT_ACCESS_TOKEN_EXPIRES_IN as string,
+  BCRYPT_SALT_ROUNDS: process.env.BCRYPT_SALT_ROUNDS as string, 
+
+  SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL as string,
+  SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD as string,
+  
+};
     }
 
 export const envVars = loadEnvVariables();
