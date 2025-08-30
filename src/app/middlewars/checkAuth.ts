@@ -3,23 +3,28 @@ import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
 import { verifyToken } from "../utils/jwt";
-import { NextFunction, Response } from "express";
-import { AuthenticatedRequest } from "./../Interfaces/index.d";
+import { NextFunction, Response, Request } from "express";
+// import { AuthenticatedRequest } from "./../Interfaces/index.d";
+import { User } from "../modules/user/user.model";
+import { IsActive } from "../modules/user/user.interface";
 
-// declare global {
-//   namespace Express {
-//     interface Request {
-//       user: JwtPayload;
-//     }
-//   }
-// }
+import httpStatus from "http-status-codes";
+
+
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: JwtPayload;
+    }
+  }
+}
 
 export const checkAuth =
   (...authRoles: string[]) =>
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const accessToken =
-        req.headers.authorization || req.headers.Authorization;
+      const accessToken = req.headers.authorization;
       if (!accessToken) {
         throw new AppError(401, "Unauthorized");
       }
@@ -28,6 +33,31 @@ export const checkAuth =
         accessToken as string,
         envVars.JWT_SECRET
       ) as JwtPayload;
+
+      // Check if the user's role is in the allowed roles
+      if (!authRoles.includes(verifiedToken.role)) {
+        throw new AppError(403, "You are not permitted to access this route");
+      }
+
+      const isUserExist = await User.findOne({
+        email: verifiedToken.email,
+      });
+
+      if (!isUserExist) {
+        throw new AppError(httpStatus.BAD_REQUEST, "User not found");
+      }
+      if (
+        isUserExist.isActive === IsActive.BLOCKED ||
+        isUserExist.isActive === IsActive.INACTIVE
+      ) {
+        throw new AppError(
+          httpStatus.UNAUTHORIZED,
+          `User is ${isUserExist.isActive}`
+        );
+      }
+      if (isUserExist.isDeleted) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "User is deleted");
+      }
 
       if (!authRoles.includes(verifiedToken.role)) {
         throw new AppError(403, "You are not permitted to access this route");
@@ -48,8 +78,8 @@ export const checkAuth =
       // if (authRoles.includes(verifiedToken.role)) {
       //   throw new AppError(403, "Forbidden");
       // }
-      console.log(verifiedToken);
       req.user = verifiedToken;
+      console.log(verifiedToken);
 
       next();
     } catch (error) {
