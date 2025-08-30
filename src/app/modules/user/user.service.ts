@@ -46,6 +46,7 @@ const getUsers = async () => {
 
 const updateUser= async (userId: string, payload: Partial<IUser>, decodedToken:JwtPayload) => {
 
+ 
     const isUserExist = await User.findById(userId);
     if (!isUserExist) {
         throw new AppError(httpStatus.NOT_FOUND, "User not found");

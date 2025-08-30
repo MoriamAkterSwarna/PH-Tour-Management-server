@@ -2,6 +2,7 @@ import z from "zod";
 import { IsActive, Role } from "./user.interface";
 
    export const createUserZodSchema = z.object({
+    _id: z.string().uuid(),
   name: z
     .string({ invalid_type_error: "Name must be string" })
     .min(2, { message: "Name must be at least 2 characters long." })
@@ -39,6 +40,7 @@ import { IsActive, Role } from "./user.interface";
 
 
 export const updateUserZodSchema = z.object({
+  // _id: z.string().uuid().optional(),
   name: z
     .string({ invalid_type_error: "Name must be string" })
     .min(2, { message: "Name must be at least 2 characters long." })
